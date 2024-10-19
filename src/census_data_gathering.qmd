@@ -1,0 +1,58 @@
+---
+title: "census_data_gathering"
+format: html
+editor: visual
+---
+
+## Connecting Census API
+
+Ran `census_api_key("KEY", install = TRUE)` in the console.
+
+```{r}
+library(tidycensus)
+library(tidyverse)
+options(tigris_use_cache = TRUE)
+
+#vars <- load_variables(2022, "acs5", cache=TRUE) |> filter(geography == "tract")
+#acs_subjects <- load_variables(2022, "acs5/subject", cache=TRUE)
+#acs_profile <- load_variables(2022, "acs5/profile", cache=TRUE)
+```
+
+## Selecting variables
+
+Looking at variables available in the 5-year ACS (stored in `vars`), the following may be helpful:
+
+- `B15001` : Sex by Age by Educational Attainment for the Population 18 Years and Over
+- `B25104` : Monthly housing cost
+    - This could be useful in determining median housing cost to median household income ratio
+        - (some research suggests that housing stability is one of the most important factors in terms of absenteeism, and when families get financial assitance, they tend to spend it on children's education)
+- `B25122` : Household Income in the Past 12 Months (in 2022 Inflation-Adjusted Dollars) by Gross Rent
+- `B25012` : Tenure by Families and Presence of Own Children
+
+
+## Get data using tidycensus
+
+```{r}
+housing_cost <- get_acs(
+  geography = "tract", 
+  table = "B25104", 
+  state = "DC",
+  year = 2022,
+  geometry = TRUE
+)
+
+```
+```{r}
+housing_cost |> 
+  mutate(log_est = log(estimate)) |>
+  ggplot(aes(fill=log_est)) + 
+    geom_sf()
+```
+
+
+
+## Other data
+
+- Household composition from CPS
+- Time use patterns among teens
+- Absenteeism from time use?
